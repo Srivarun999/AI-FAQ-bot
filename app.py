@@ -131,7 +131,7 @@ def get_index():
 
 index, faq_list = get_index()
 
-st.title("🤖 FAQ Bot")
+st.title("🤖 VARUN'S FAQ Bot")
 st.markdown(
     '<p class="subtitle">Ask any Computer Science question — answered '
     'intelligently from a 151-entry AI/ML FAQ knowledge base using embeddings + '
@@ -148,36 +148,12 @@ question = st.text_input(
     key="main_search"
 )
 
-col1, col2, col3 = st.columns([1, 1, 1])
-with col1:
-    ask = st.button("🔎 Generate Answer", use_container_width=True)
-with col2:
-    show_kb = st.button("📚 Knowledge Base", use_container_width=True)
+ask = st.button("🔎 Generate Answer", use_container_width=True)
 
 st.divider()
 
 if "search_results" not in st.session_state:
     st.session_state.search_results = None
-if "show_knowledge_base" not in st.session_state:
-    st.session_state.show_knowledge_base = False
-
-if show_kb:
-    st.session_state.show_knowledge_base = not st.session_state.show_knowledge_base
-
-if st.session_state.show_knowledge_base:
-    st.subheader("📚 Complete FAQ Knowledge Base")
-    st.markdown(f"**Total FAQs:** {len(faq_list)}")
-    
-    for item in faq_list:
-        st.markdown(
-            f'<div class="faq-item">'
-            f'<span class="badge">{item["category"]}</span><br>'
-            f'<b>Q{item["id"]}: {item["question"]}</b><br><br>'
-            f'<i>A: {item["answer"]}</i>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
-    st.divider()
 
 if ask:
     if not question.strip():
@@ -196,13 +172,19 @@ if st.session_state.search_results is not None:
         
         best = results[0]
         
-        # Display answer with cosine similarity aside
+        # Display best matched question with cosine similarity
         col1, col2 = st.columns([4, 1])
         with col1:
-            st.markdown(f'<div class="answer-box">{best["answer"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<span class="badge">{best["category"]}</span>')
+            st.markdown(f"**Q:** _{best['question']}_")
         with col2:
             similarity_pct = int(best["score"] * 100)
             st.metric("Cosine Similarity", f"{similarity_pct}%")
+        
+        st.divider()
+        
+        # Display answer
+        st.markdown(f'<div class="answer-box">{best["answer"]}</div>', unsafe_allow_html=True)
         
         st.divider()
         
@@ -223,26 +205,6 @@ if st.session_state.search_results is not None:
             token_df_data.append({"Token": token, "Token ID": token_id})
         
         st.dataframe(token_df_data, use_container_width=True, hide_index=True)
-        
-        st.divider()
-        
-        if len(results) > 1:
-            st.subheader(f"🔗 Related Matches ({len(results) - 1})")
-            for i, r in enumerate(results[1:], 1):
-                match_col1, match_col2 = st.columns([5, 1])
-                with match_col1:
-                    st.markdown(
-                        f'<div class="match-card">'
-                        f'<span class="badge">{r["category"]}</span>'
-                        f'<span class="badge">Score: {r["score"]:.4f}</span><br>'
-                        f'<b>#{i+1} - {r["question"]}</b><br>'
-                        f'{r["answer"]}'
-                        f'</div>',
-                        unsafe_allow_html=True,
-                    )
-                with match_col2:
-                    sim_pct = int(r["score"] * 100)
-                    st.metric(f"Similarity #{i+1}", f"{sim_pct}%")
         
         st.divider()
         with st.expander("📊 About FAISS & Cosine Similarity"):
