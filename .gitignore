@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+data/faq_index.faiss
+data/faq_meta.json
+.streamlit/secrets.toml
